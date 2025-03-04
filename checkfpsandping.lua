@@ -5,16 +5,22 @@ local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
+-- Tạo Frame chứa Ping & FPS (dễ ẩn/hiện hơn)
+local statsFrame = Instance.new("Frame")
+statsFrame.Size = UDim2.new(0, 200, 0, 50)
+statsFrame.Position = UDim2.new(0, 10, 0.5, -25)
+statsFrame.BackgroundTransparency = 1
+statsFrame.Parent = gui
+
 -- Tạo TextLabel hiển thị Ping & FPS
 local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(0, 200, 0, 50)
-textLabel.Position = UDim2.new(0, 10, 0.5, -25)
+textLabel.Size = UDim2.new(1, 0, 1, 0)
 textLabel.BackgroundTransparency = 1
 textLabel.TextColor3 = Color3.new(1, 1, 1)
 textLabel.TextScaled = true
-textLabel.Parent = gui
+textLabel.Parent = statsFrame
 
--- Tạo nút bật/tắt GUI
+-- Tạo nút bật/tắt GUI (nút luôn hiển thị)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 60, 0, 30)  
 toggleButton.Position = UDim2.new(0, 10, 0, 10)  
@@ -23,10 +29,12 @@ toggleButton.TextColor3 = Color3.new(1, 1, 1)  -- Chữ trắng
 toggleButton.Text = "OFF"
 toggleButton.Parent = gui
 
--- Xử lý bật/tắt GUI khi bấm nút
+-- Xử lý bật/tắt GUI (chỉ ẩn/hiện Ping & FPS, không ẩn nút)
+local isOn = false
 toggleButton.MouseButton1Click:Connect(function()
-    gui.Enabled = not gui.Enabled
-    toggleButton.Text = gui.Enabled and "ON" or "OFF"
+    isOn = not isOn
+    statsFrame.Visible = isOn
+    toggleButton.Text = isOn and "ON" or "OFF"
 end)
 
 -- Cập nhật Ping & FPS liên tục
