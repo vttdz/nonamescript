@@ -1,104 +1,44 @@
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Stats = game:GetService("Stats")
-local UserInputService = game:GetService("UserInputService")
+repeat task.wait() until game:IsLoaded() and game.Players.LocalPlayer
 
-local LocalPlayer = Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui")
-local fpsLabel = Instance.new("TextLabel")
-local pingLabel = Instance.new("TextLabel")
+-- Tạo GUI chính
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+
+-- Tạo TextLabel hiển thị Ping & FPS
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(0, 200, 0, 50)
+textLabel.Position = UDim2.new(0, 10, 0.5, -25)
+textLabel.BackgroundTransparency = 1
+textLabel.TextColor3 = Color3.new(1, 1, 1)
+textLabel.TextScaled = true
+textLabel.Parent = gui
+
+-- Tạo nút bật/tắt GUI
 local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 60, 0, 30)  
+toggleButton.Position = UDim2.new(0, 10, 0, 10)  
+toggleButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)  -- Màu xám đơn giản
+toggleButton.TextColor3 = Color3.new(1, 1, 1)  -- Chữ trắng
+toggleButton.Text = "OFF"
+toggleButton.Parent = gui
 
-local isVisible = true
-
--- Cấu hình ScreenGui
-screenGui.Parent = game.CoreGui
-screenGui.DisplayOrder = 100
-
--- Cấu hình FPS Label
-fpsLabel.Parent = screenGui
-fpsLabel.Size = UDim2.new(0, 300, 0, 30)
-fpsLabel.Position = UDim2.new(0, 72, 0, 56)
-fpsLabel.Font = Enum.Font.FredokaOne
-fpsLabel.TextScaled = true
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.TextStrokeTransparency = 0.3
-fpsLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng cố định
-fpsLabel.Visible = isVisible
-
--- Cấu hình Ping Label
-pingLabel.Parent = screenGui
-pingLabel.Size = UDim2.new(0, 443, 0, 29)
-pingLabel.Position = UDim2.new(0, 50, 0, 80)
-pingLabel.Font = Enum.Font.FredokaOne
-pingLabel.TextScaled = true
-pingLabel.BackgroundTransparency = 1
-pingLabel.TextStrokeTransparency = 0.3
-pingLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng cố định
-pingLabel.Visible = isVisible
-
--- Cấu hình Toggle Button
-toggleButton.Parent = screenGui
-toggleButton.Size = UDim2.new(0, 30, 0, 30)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.BackgroundColor3 = Color3.new(0, 0, 0)
-toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.Font = Enum.Font.FredokaOne
-toggleButton.Text = "ON"
-toggleButton.TextScaled = true
-toggleButton.AutoButtonColor = true
-toggleButton.BorderSizePixel = 0
-toggleButton.BackgroundTransparency = 0.2
-
--- Xử lý toggle visibility
+-- Xử lý bật/tắt GUI khi bấm nút
 toggleButton.MouseButton1Click:Connect(function()
-    isVisible = not isVisible
-    fpsLabel.Visible = isVisible
-    pingLabel.Visible = isVisible
-    toggleButton.Text = isVisible and "ON" or "OFF"
+    gui.Enabled = not gui.Enabled
+    toggleButton.Text = gui.Enabled and "ON" or "OFF"
 end)
 
--- Hàm lấy icon FPS
-local function getFpsIcon(fps)
-    if fps >= 15 then
-        return "🟢"
-    elseif fps >= 9 then
-        return "🔵"
-    elseif fps >= 4 then
-        return "🔴"
-    else
-        return "⚫"
-    end
-end
+-- Cập nhật Ping & FPS liên tục
+task.spawn(function()
+    while task.wait(1) do
+        local ping = game:GetService("Stats").Network:FindFirstChild("Ping") 
+        local fps = math.floor(1 / task.wait())
 
--- Khởi tạo biến theo dõi FPS và Ping
-local frameCount = 0
-local lastUpdate = os.clock()
-local updateInterval = 1 -- Cập nhật mỗi giây
-
--- Kết nối sự kiện RenderStepped
-RunService.RenderStepped:Connect(function(dt)
-    frameCount = frameCount + 1
-    local now = os.clock()
-
-    if now - lastUpdate >= updateInterval then
-        local fps = frameCount / (now - lastUpdate)
-        frameCount = 0
-        lastUpdate = now
-
-        -- Lấy tên người chơi và ẩn một phần
-        local userName = LocalPlayer and LocalPlayer.Name or "Unknown"
-        local hiddenName = string.rep("*", 4) .. (string.sub(userName, 5) or "")
-
-        -- Lấy Ping (kiểm tra lỗi cẩn thận)
-        local ping = 0
-        if Stats and Stats.Network and Stats.Network.ServerStatsItem and Stats.Network.ServerStatsItem["Data Ping"] then
-            ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 0
+        if ping then
+            textLabel.Text = "Ping: " .. math.floor(ping.Value) .. " ms | FPS: " .. fps
+        else
+            textLabel.Text = "Không thể lấy Ping | FPS: " .. fps
         end
-
-        -- Cập nhật giao diện
-        local fpsIcon = getFpsIcon(math.floor(fps))
-        fpsLabel.Text = string.format("%s, FPS: %d %s", hiddenName, math.floor(fps), fpsIcon)
-        pingLabel.Text = string.format("🎮 Ping: %dms", math.floor(ping))
     end
-end
+end)
