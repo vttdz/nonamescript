@@ -23,7 +23,7 @@ fpsLabel.Font = Enum.Font.FredokaOne
 fpsLabel.TextScaled = true
 fpsLabel.BackgroundTransparency = 1
 fpsLabel.TextStrokeTransparency = 0.3
-fpsLabel.TextColor3 = Color3.new(1, 1, 1)
+fpsLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng cố định
 fpsLabel.Visible = isVisible
 
 -- Cấu hình Ping Label
@@ -34,7 +34,7 @@ pingLabel.Font = Enum.Font.FredokaOne
 pingLabel.TextScaled = true
 pingLabel.BackgroundTransparency = 1
 pingLabel.TextStrokeTransparency = 0.3
-pingLabel.TextColor3 = Color3.new(1, 1, 1)
+pingLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng cố định
 pingLabel.Visible = isVisible
 
 -- Cấu hình Toggle Button
@@ -71,17 +71,6 @@ local function getFpsIcon(fps)
     end
 end
 
--- Hàm tạo hiệu ứng cầu vồng với tần suất thấp hơn
-local function rainbowColor()
-    local hue = 0
-    while true do
-        hue = (hue + 0.005) % 1 -- Tăng chậm hơn để giảm tải
-        fpsLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
-        pingLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
-        task.wait(0.1) -- Giảm tần suất cập nhật màu để tiết kiệm tài nguyên
-    end
-end
-
 -- Khởi tạo biến theo dõi FPS và Ping
 local frameCount = 0
 local lastUpdate = os.clock()
@@ -112,7 +101,4 @@ RunService.RenderStepped:Connect(function(dt)
         fpsLabel.Text = string.format("%s, FPS: %d %s", hiddenName, math.floor(fps), fpsIcon)
         pingLabel.Text = string.format("🎮 Ping: %dms", math.floor(ping))
     end
-end)
-
--- Bắt đầu hiệu ứng cầu vồng
-task.spawn(rainbowColor)
+end
